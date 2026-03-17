@@ -57,3 +57,7 @@ Format this into a clean task brief.
 
 Pass the formatted task brief to the **orchestrator** agent to begin the
 full development pipeline (branch → BA → Architect → Dev → Review → Test → Push).
+
+Make sure the orchestrator knows the Jira ticket ID (`$ARGUMENTS`) so it can
+use it as the task identifier when naming the branch and the docs directory
+(`docs/jira/$ARGUMENTS/`).
