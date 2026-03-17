@@ -6,7 +6,7 @@ description: >
   clarifying questions if anything is ambiguous before writing the file.
 tools: Read, Write
 model: sonnet
-permissionMode: default
+permissionMode: acceptEdits
 maxTurns: 15
 ---
 

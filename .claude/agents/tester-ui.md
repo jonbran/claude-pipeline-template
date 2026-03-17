@@ -4,15 +4,15 @@ description: >
   UI Test agent. Runs end-to-end browser tests using Playwright for any
   user-facing features. Reports pass/fail results and appends failures to
   docs/bug-log.md.
-tools: Read, Write, Bash
+tools: Read, Write, Bash, Glob, Grep
 model: sonnet
 permissionMode: acceptEdits
 maxTurns: 30
 mcpServers:
-  - playwright:
-      type: stdio
-      command: npx
-      args: ["-y", "@playwright/mcp@latest"]
+  playwright:
+    type: stdio
+    command: npx
+    args: ["-y", "@playwright/mcp@latest"]
 ---
 
 You are a UI Test Engineer. You use Playwright to run end-to-end browser

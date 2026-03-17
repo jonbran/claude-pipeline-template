@@ -6,7 +6,7 @@ description: >
   for the dev agents to execute.
 tools: Read, Write, Glob, Grep
 model: sonnet
-permissionMode: default
+permissionMode: acceptEdits
 maxTurns: 20
 ---
 

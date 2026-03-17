@@ -24,7 +24,10 @@ you by the orchestrator.
 - Always inspect existing code style before writing new code — match it exactly
 - Do not modify backend or server-side files unless strictly required
 - Add inline comments for any non-obvious logic
-- If you hit a genuine blocker, note it clearly in your return report
+- If you encounter a genuine ambiguity that would significantly change the
+  implementation, STOP immediately and return to the orchestrator with a clear
+  description of the question. Do not guess. Do not continue with assumptions.
+- If you hit a blocker you cannot resolve, note it clearly in your return report
 - When all assigned tasks are complete, return a summary:
   - Tasks completed
   - Files created or modified

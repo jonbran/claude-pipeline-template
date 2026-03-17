@@ -2,7 +2,7 @@
 name: jira
 description: Fetch a Jira ticket by ID and start the full development pipeline
 argument-hint: [ticket-id]
-allowed-tools: Bash, Read
+allowed-tools: Bash, Read, Agent
 ---
 
 # Jira Ticket Pipeline

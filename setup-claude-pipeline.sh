@@ -31,6 +31,17 @@ fi
 cd "$TARGET"
 PROJECT_DIR="$(pwd)"
 
+# ── Check for existing pipeline ─────────────────────────────────────────────
+if [ -d ".claude/agents" ]; then
+  echo ""
+  echo -e "${YELLOW}WARNING: .claude/agents/ already exists in this project.${RESET}"
+  echo -e "${YELLOW}Running this script will overwrite all existing agent files.${RESET}"
+  echo -e "${YELLOW}If you have customised agents (e.g. via /configure-pipeline), they will be reset.${RESET}"
+  echo ""
+  echo -e "Press ${BOLD}Enter${RESET} to continue or ${BOLD}Ctrl+C${RESET} to cancel."
+  read -r
+fi
+
 echo ""
 echo -e "${BOLD}${BLUE}╔══════════════════════════════════════════════════════════╗${RESET}"
 echo -e "${BOLD}${BLUE}║     Claude Code Multi-Agent Pipeline Setup               ║${RESET}"
@@ -138,10 +149,28 @@ Spawn the relevant agent(s) as parallel background agents. Pass each:
 - Their specific task list
 - Paths to `docs/requirements.md` and `docs/architecture.md`
 
-Wait for all spawned dev agents to complete before proceeding to Phase 4.5.
+Wait for all spawned dev agents to complete.
+
+When a dev agent returns, check its report:
+- If the report lists **unresolved questions** or ambiguities, relay the question
+  to the user. After getting the answer, re-delegate to the same dev agent with
+  the answer included.
+- If the report indicates **incomplete tasks** (e.g. hit maxTurns limit or an
+  unresolvable blocker), report the situation to the user and ask whether to
+  re-delegate the remaining tasks or stop the pipeline.
+- Only proceed to Phase 4.25 once all assigned dev work is confirmed complete.
+
+### Phase 4.25 — Checkpoint Commit
+After dev agents complete, stage and commit all work so far. This creates a
+recovery point and ensures `git diff` captures new files.
+```bash
+git add -A
+git status --short          # verify what will be committed
+git commit -m "wip: implement <task-slug> — dev agents complete"
+```
 
 ### Phase 4.5 — Code Review & Security Review (Parallel)
-After dev agents complete, collect the full diff before spawning reviewers:
+Collect the full diff against the base branch before spawning reviewers:
 ```bash
 git diff main --name-only   # list of changed files
 git diff main               # full diff showing exactly what changed
@@ -180,6 +209,20 @@ If the same failure persists after 3 attempts, stop the loop and report to the u
 > "⚠️ After 3 fix attempts, these tests are still failing: [list]. Manual investigation required."
 > Ask the user how to proceed before continuing.
 
+### Phase 6.5 — Final Commit
+Once all tests pass, create a clean commit with all remaining changes:
+```bash
+git add -A
+git status --short
+git commit -m "feat: <task-slug> — all tests passing"
+```
+If `docs/bug-log.md` exists and all tests now pass, delete it before committing:
+```bash
+rm -f docs/bug-log.md
+```
+Stage and commit `docs/requirements.md` and `docs/architecture.md` — they
+provide useful context for PR reviewers.
+
 ### Phase 7 — Completion
 When all tests pass, report a summary to the user:
 - Branch name
@@ -211,7 +254,7 @@ description: >
   clarifying questions if anything is ambiguous before writing the file.
 tools: Read, Write
 model: sonnet
-permissionMode: default
+permissionMode: acceptEdits
 maxTurns: 15
 ---
 
@@ -274,7 +317,7 @@ description: >
   for the dev agents to execute.
 tools: Read, Write, Glob, Grep
 model: sonnet
-permissionMode: default
+permissionMode: acceptEdits
 maxTurns: 20
 ---
 
@@ -368,7 +411,10 @@ you by the orchestrator.
 - Always inspect existing code style before writing new code — match it exactly
 - Do not modify backend or server-side files unless strictly required
 - Add inline comments for any non-obvious logic
-- If you hit a genuine blocker, note it clearly in your return report
+- If you encounter a genuine ambiguity that would significantly change the
+  implementation, STOP immediately and return to the orchestrator with a clear
+  description of the question. Do not guess. Do not continue with assumptions.
+- If you hit a blocker you cannot resolve, note it clearly in your return report
 - When all assigned tasks are complete, return a summary:
   - Tasks completed
   - Files created or modified
@@ -405,7 +451,10 @@ you by the orchestrator.
 - Validate all inputs and handle errors properly
 - Do not modify frontend files unless strictly required
 - Add inline comments for any non-obvious logic
-- If you hit a genuine blocker, note it clearly in your return report
+- If you encounter a genuine ambiguity that would significantly change the
+  implementation, STOP immediately and return to the orchestrator with a clear
+  description of the question. Do not guess. Do not continue with assumptions.
+- If you hit a blocker you cannot resolve, note it clearly in your return report
 - When all assigned tasks are complete, return a summary:
   - Tasks completed
   - Files created or modified
@@ -656,15 +705,15 @@ description: >
   UI Test agent. Runs end-to-end browser tests using Playwright for any
   user-facing features. Reports pass/fail results and appends failures to
   docs/bug-log.md.
-tools: Read, Write, Bash
+tools: Read, Write, Bash, Glob, Grep
 model: sonnet
 permissionMode: acceptEdits
 maxTurns: 30
 mcpServers:
-  - playwright:
-      type: stdio
-      command: npx
-      args: ["-y", "@playwright/mcp@latest"]
+  playwright:
+    type: stdio
+    command: npx
+    args: ["-y", "@playwright/mcp@latest"]
 ---
 
 You are a UI Test Engineer. You use Playwright to run end-to-end browser
@@ -1276,7 +1325,7 @@ cat > .claude/commands/jira.md << 'EOF'
 name: jira
 description: Fetch a Jira ticket by ID and start the full development pipeline
 argument-hint: [ticket-id]
-allowed-tools: Bash, Read
+allowed-tools: Bash, Read, Agent
 ---
 
 # Jira Ticket Pipeline

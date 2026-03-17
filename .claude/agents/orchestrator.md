@@ -55,10 +55,28 @@ Spawn the relevant agent(s) as parallel background agents. Pass each:
 - Their specific task list
 - Paths to `docs/requirements.md` and `docs/architecture.md`
 
-Wait for all spawned dev agents to complete before proceeding to Phase 4.5.
+Wait for all spawned dev agents to complete.
+
+When a dev agent returns, check its report:
+- If the report lists **unresolved questions** or ambiguities, relay the question
+  to the user. After getting the answer, re-delegate to the same dev agent with
+  the answer included.
+- If the report indicates **incomplete tasks** (e.g. hit maxTurns limit or an
+  unresolvable blocker), report the situation to the user and ask whether to
+  re-delegate the remaining tasks or stop the pipeline.
+- Only proceed to Phase 4.25 once all assigned dev work is confirmed complete.
+
+### Phase 4.25 — Checkpoint Commit
+After dev agents complete, stage and commit all work so far. This creates a
+recovery point and ensures `git diff` captures new files.
+```bash
+git add -A
+git status --short          # verify what will be committed
+git commit -m "wip: implement <task-slug> — dev agents complete"
+```
 
 ### Phase 4.5 — Code Review & Security Review (Parallel)
-After dev agents complete, collect the full diff before spawning reviewers:
+Collect the full diff against the base branch before spawning reviewers:
 ```bash
 git diff main --name-only   # list of changed files
 git diff main               # full diff showing exactly what changed
@@ -96,6 +114,20 @@ If any tester reports failures:
 If the same failure persists after 3 attempts, stop the loop and report to the user:
 > "⚠️ After 3 fix attempts, these tests are still failing: [list]. Manual investigation required."
 > Ask the user how to proceed before continuing.
+
+### Phase 6.5 — Final Commit
+Once all tests pass, create a clean commit with all remaining changes:
+```bash
+git add -A
+git status --short
+git commit -m "feat: <task-slug> — all tests passing"
+```
+If `docs/bug-log.md` exists and all tests now pass, delete it before committing:
+```bash
+rm -f docs/bug-log.md
+```
+Stage and commit `docs/requirements.md` and `docs/architecture.md` — they
+provide useful context for PR reviewers.
 
 ### Phase 7 — Completion
 When all tests pass, report a summary to the user:
