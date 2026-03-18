@@ -23,26 +23,43 @@ git status
 ```
 If `git status` fails (not a git repo), tell the user and stop — do not `git init` automatically.
 
-Create the branch:
+Determine the task identifier:
+- If a Jira ticket ID was provided (e.g. `ABC-123`), use it as-is.
+- Otherwise, derive a short kebab-case slug from the task title (e.g. `add-login-page`).
+
+Create the branch and docs directory:
 ```bash
 git checkout -b feature/<task-id-or-slug>
+mkdir -p docs/jira/<task-id-or-slug>
 ```
-Use a short, descriptive slug derived from the task title if there is no ticket ID.
-Report the branch name to the user before continuing.
+
+The docs directory for this task is `docs/jira/<task-id-or-slug>`. Use this path
+(referred to as `DOCS_DIR` throughout these instructions) for all pipeline artifacts:
+- `DOCS_DIR/requirements.md`
+- `DOCS_DIR/architecture.md`
+- `DOCS_DIR/bug-log.md`
+
+Report the branch name and docs path to the user before continuing.
 
 ### Phase 2 — Business Analysis
-Delegate to the `ba` sub-agent, passing the full task/ticket description.
-Wait for it to return confirmation that `docs/requirements.md` is complete.
+Delegate to the `ba` sub-agent, passing:
+- The full task/ticket description
+- The docs path: `DOCS_DIR` (e.g. `docs/jira/ABC-123`)
+
+Wait for it to return confirmation that `DOCS_DIR/requirements.md` is complete.
 The BA agent may ask the user clarifying questions — this is expected and required.
 Do NOT proceed to Phase 3 until the BA confirms completion.
 
 ### Phase 3 — Architecture
-Delegate to the `architect` sub-agent, passing the path `docs/requirements.md`.
-Wait for architect to confirm that `docs/architecture.md` is complete.
+Delegate to the `architect` sub-agent, passing:
+- The docs path: `DOCS_DIR`
+- The requirements file path: `DOCS_DIR/requirements.md`
+
+Wait for architect to confirm that `DOCS_DIR/architecture.md` is complete.
 Do NOT proceed to Phase 4 until the Architect confirms completion.
 
 ### Phase 4 — Development (Parallel)
-Read `docs/architecture.md`. Split tasks into:
+Read `DOCS_DIR/architecture.md`. Split tasks into:
 - Frontend tasks (UI, components, client-side logic) → `dev-frontend`
 - Backend tasks (APIs, services, data, server-side) → `dev-backend`
 - Shared / Config tasks (SH-xx) → assign to whichever dev agent is most relevant,
@@ -53,7 +70,8 @@ Only spawn agents that have actual tasks. If there are no frontend tasks, skip
 
 Spawn the relevant agent(s) as parallel background agents. Pass each:
 - Their specific task list
-- Paths to `docs/requirements.md` and `docs/architecture.md`
+- The docs path: `DOCS_DIR`
+- Full paths: `DOCS_DIR/requirements.md` and `DOCS_DIR/architecture.md`
 
 Wait for all spawned dev agents to complete.
 
@@ -90,6 +108,7 @@ Spawn two review agents in parallel as background agents:
 Pass each reviewer:
 - The list of changed files
 - The full git diff output (so they focus on new/changed code, not the whole codebase)
+- The docs path: `DOCS_DIR` (so they can read requirements and architecture)
 
 Wait for both to complete, then evaluate results:
 - If `code-reviewer` reports **CRITICAL** issues → re-delegate those files to the relevant dev agent, then re-run code-reviewer
@@ -99,14 +118,14 @@ Wait for both to complete, then evaluate results:
 
 ### Phase 5 — Testing
 Run testers sequentially:
-1. Delegate to `tester-unit` — pass paths to all modified/created source files
+1. Delegate to `tester-unit` — pass paths to all modified/created source files and `DOCS_DIR`
 2. Wait for unit test results
-3. If UI work was done, delegate to `tester-ui` — pass relevant component/route paths
+3. If UI work was done, delegate to `tester-ui` — pass relevant component/route paths and `DOCS_DIR`
 4. Wait for UI test results
 
 ### Phase 6 — Bug Loop
 If any tester reports failures:
-1. Summarise the failures from `docs/bug-log.md`
+1. Summarise the failures from `DOCS_DIR/bug-log.md`
 2. Re-delegate to the relevant dev agent, including the bug log
 3. Re-run the relevant tester after the fix
 4. Repeat until all tests pass, **up to a maximum of 3 fix-test cycles**
@@ -122,11 +141,11 @@ git add -A
 git status --short
 git commit -m "feat: <task-slug> — all tests passing"
 ```
-If `docs/bug-log.md` exists and all tests now pass, delete it before committing:
+If `DOCS_DIR/bug-log.md` exists and all tests now pass, delete it before committing:
 ```bash
-rm -f docs/bug-log.md
+rm -f DOCS_DIR/bug-log.md
 ```
-Stage and commit `docs/requirements.md` and `docs/architecture.md` — they
+Stage and commit `DOCS_DIR/requirements.md` and `DOCS_DIR/architecture.md` — they
 provide useful context for PR reviewers.
 
 ### Phase 7 — Completion

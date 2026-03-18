@@ -16,7 +16,9 @@ during this task for security vulnerabilities and report findings to the orchest
 
 ## Your Process
 
-1. Read `docs/requirements.md` to understand what the feature does and what data it handles
+1. Read the requirements file from the docs path provided by the orchestrator
+   (e.g. `docs/jira/ABC-123/requirements.md`) to understand what the feature
+   does and what data it handles
 2. Read every source file provided by the orchestrator
 3. Audit for the OWASP Top 10 and common vulnerability classes:
 
