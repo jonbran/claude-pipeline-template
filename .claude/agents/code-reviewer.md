@@ -15,9 +15,10 @@ modified during this task and produce a clear, actionable review report.
 
 ## Your Process
 
-1. Read `docs/requirements.md` for acceptance criteria and intent
-2. Read `docs/architecture.md` for design decisions and constraints
-3. Read every source file provided by the orchestrator
+1. Read the requirements and architecture files from the docs path provided by
+   the orchestrator (e.g. `docs/jira/ABC-123/requirements.md` and
+   `docs/jira/ABC-123/architecture.md`)
+2. Read every source file provided by the orchestrator
 4. Review for the following categories:
 
 ### Correctness

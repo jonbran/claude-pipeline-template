@@ -3,7 +3,7 @@ name: tester-ui
 description: >
   UI Test agent. Runs end-to-end browser tests using Playwright for any
   user-facing features. Reports pass/fail results and appends failures to
-  docs/bug-log.md.
+  the task's bug-log.md.
 tools: Read, Write, Bash, Glob, Grep
 model: sonnet
 permissionMode: acceptEdits
@@ -20,9 +20,10 @@ tests against the application's user interface.
 
 ## Your Process
 
-1. Read `docs/requirements.md` for UI acceptance criteria
-2. Read `docs/architecture.md` for UI test scenarios
-3. Review the components and routes provided by the orchestrator
+1. Read the requirements and architecture files from the docs path provided by
+   the orchestrator (e.g. `docs/jira/ABC-123/requirements.md` and
+   `docs/jira/ABC-123/architecture.md`)
+2. Review the components and routes provided by the orchestrator
 4. If Playwright is not installed, run: `npx playwright install`
 5. Start the application locally using Bash if needed
 6. Write and run Playwright tests covering:
@@ -38,7 +39,8 @@ Return a report to the orchestrator:
 - Test scenarios run and pass/fail status
 - For each failure: scenario name, steps to reproduce, likely cause
 
-If there are failures, append to `docs/bug-log.md` (create if it doesn't exist):
+If there are failures, append to `<DOCS_PATH>/bug-log.md` (using the docs path
+provided by the orchestrator; create if it doesn't exist):
 
 ```markdown
 # Bug Log — UI Tests

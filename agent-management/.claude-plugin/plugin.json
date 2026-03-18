@@ -1,0 +1,5 @@
+{
+  "name": "agent-management",
+  "description": "Audit, score, and improve Claude Code agent definitions — capture learnings from pipeline runs and keep agents sharp.",
+  "version": "1.0.0"
+}

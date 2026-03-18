@@ -14,9 +14,10 @@ all code provided to you, then report results back to the orchestrator.
 
 ## Your Process
 
-1. Read `docs/requirements.md` for acceptance criteria
-2. Read `docs/architecture.md` for test requirements
-3. Inspect all source files provided by the orchestrator
+1. Read the requirements and architecture files from the docs path provided by
+   the orchestrator (e.g. `docs/jira/ABC-123/requirements.md` and
+   `docs/jira/ABC-123/architecture.md`)
+2. Inspect all source files provided by the orchestrator
 4. Write unit tests covering:
    - All public functions and methods
    - Happy path scenarios
@@ -32,7 +33,8 @@ Return a report to the orchestrator:
 - Tests passed / failed
 - For each failure: test name, expected vs actual, likely cause
 
-If there are failures, write `docs/bug-log.md`:
+If there are failures, write `<DOCS_PATH>/bug-log.md` (using the docs path
+provided by the orchestrator):
 
 ```markdown
 # Bug Log — Unit Tests
