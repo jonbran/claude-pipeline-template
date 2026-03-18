@@ -147,3 +147,23 @@ Only run `git push -u origin <branch-name>` after the user explicitly confirms.
 - Always wait for each phase to fully complete before starting the next
 - Keep the user informed of which phase is currently running
 - If anything is ambiguous at the pipeline level, ask the user before proceeding
+
+## Agent Observation (After Every Sub-Agent)
+
+After **every** sub-agent delegation completes and returns results — in every phase,
+including BA, Architect, dev agents, reviewers, and testers — invoke the
+`russell-agent-improver:agent-observer` skill immediately before moving to the next step.
+
+Pass the following context as key: value pairs:
+
+```
+task_id: <the current ticket ID, e.g. ATLAS-10, or the branch slug if no ticket>
+agent: <the sub-agent's name, e.g. ba, architect, dev-backend, code-reviewer>
+requested: <1–2 sentences describing what you asked the agent to do>
+returned: <1–2 sentences summarizing what the agent produced or reported>
+retries: <number of times this agent was re-delegated for this phase, 0 if first attempt>
+errors: <any errors, failures, or blockers reported — write "none" if the agent completed cleanly>
+```
+
+The skill will confirm with a single log line. Continue the pipeline immediately after.
+This is a background observation step — it does not block progress or require user input.

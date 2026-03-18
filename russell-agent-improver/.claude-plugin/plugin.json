@@ -1,0 +1,9 @@
+{
+  "name": "russell-agent-improver",
+  "description": "Continuously improves Claude Code agent definitions by observing sub-agent performance across tasks, logging patterns, and proposing targeted updates to agent .md files.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Russell",
+    "email": "support@russell.com"
+  }
+}
